@@ -1,4 +1,3 @@
-# Hand-To-Cursor
 # Hand to Cursor Control
 
 This Python script allows you to use a webcam and hand gestures to fully control your mouse cursor. It is designed for setups where the camera is pointed at a work surface (like a desk). Before tracking begins, the script prompts you to select a specific "work area" in the frame to improve accuracy.
