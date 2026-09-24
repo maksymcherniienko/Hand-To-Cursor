@@ -7,13 +7,15 @@ This Python script allows you to use a webcam and hand gestures to fully control
 * **Work Area Setup:** Manually select a region of interest (ROI) on the video feed where the hand will be recognized.
 
 
-* **Smooth Cursor Movement:** Tracks the hand with built-in smoothening to prevent erratic mouse jumps.
+* **Adaptive Smooth Movement:** Dynamic smoothing eliminates cursor jitter at low speeds while maintaining instant responsiveness during fast movements, with a deadzone for resting hand stability.
 
 
-* **Clicking:** Simulates a left mouse click by calculating the distance between the ring finger tip and its base joint.
+* **Cursor Freeze on Click:** Automatically freezes cursor position while pinching to prevent accidental cursor drift off target buttons.
 
 
-* **Drag & Drop:** Clicks and holds items using a "pinch" gesture (bringing the index finger and thumb together).
+* **Unified Pinch Gestures:** Distinguishes between quick taps and drag-and-drop based on pinch duration:
+  * **Click:** Quick pinch between thumb and index finger (< 0.3s).
+  * **Drag & Drop:** Pinch and hold (> 0.3s) to grab and move items.
 
 
 
@@ -53,16 +55,16 @@ python hand_to_cursor_choose_work_area.py
 * **Movement:** Move your palm over the desk. The cursor tracks the base of your middle finger (the MCP joint).
 
 
-* **Click:** Sharply bend your ring finger. The text `CLICK!` will appear on the video feed.
+* **Click:** Quickly pinch your index finger and thumb together (< 0.3s) and release.
 
 
-* **Drag:** Bring the tips of your index finger and thumb together. The text `DRAGGING` will appear on the screen. Spread the fingers apart to release the object.
+* **Drag:** Pinch and hold your index finger and thumb together (> 0.3s). The text `DRAGGING` will appear. Move your hand to drag the object, and spread your fingers apart to release.
 
 
 
 ## ⚠️ Important Notes
 
-* **Camera Index:** The code is set to capture video from camera index `1` (`cv2.VideoCapture(1)`). If you only have one webcam and the program fails to capture video, edit the code and change the `1` to `0`.
+* **Camera Index:** The code is currently set to camera index `0` (`cv2.VideoCapture(0)`). If you are using an external webcam and it doesn't open, change `0` to `1`.
 
 
 * **PyAutoGUI Failsafe:** The `pyautogui.FAILSAFE` feature is disabled (`False`). Throwing your cursor into the corner of the screen will not abort the script. You must use the `q` key to stop execution.
