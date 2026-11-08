@@ -4,7 +4,7 @@ from src.mouse_control import MouseController
 import src.config as config
 
 def main():
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(config.CAM_INDEX)
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.CAM_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.CAM_HEIGHT)
@@ -13,7 +13,7 @@ def main():
     mouse = MouseController()
 
     ret, frame = cap.read()
-    frame = cv2.flip(frame, 1)
+    frame = cv2.flip(frame, config.CAM_FLIP)
     
     # Вибір зони
     x_area, y_area, w_area, h_area = cv2.selectROI("Select work area", frame, showCrosshair=True, fromCenter=False)
@@ -26,7 +26,7 @@ def main():
     while True:
         ret, frame = cap.read()
         if not ret: break
-        frame = cv2.flip(frame, 1)
+        frame = cv2.flip(frame, config.CAM_FLIP)
 
         # Малюємо зону
         cv2.rectangle(frame, (x_area, y_area), (x_area + w_area, y_area + h_area), (0, 0, 255), 2)

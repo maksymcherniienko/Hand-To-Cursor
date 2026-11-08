@@ -1,7 +1,8 @@
 camera:
-  device_index: 1
+  device_index: 0
   width: 960
   height: 540
+  flip: 1
 
 gestures:
   pinch_threshold: 0.3

@@ -18,6 +18,7 @@ SCREEN_W, SCREEN_H = pyautogui.size()
 CAM_INDEX: int = cfg["camera"]["device_index"]
 CAM_WIDTH: int = cfg["camera"]["width"]
 CAM_HEIGHT: int = cfg["camera"]["height"]
+CAM_FLIP: int = cfg["camera"]["flip"]
 
 PINCH_THRESHOLD: float = cfg["gestures"]["pinch_threshold"]
 DRAG_DELAY_SEC: float = cfg["gestures"]["drag_delay_sec"]
