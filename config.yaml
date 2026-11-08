@@ -1,0 +1,13 @@
+camera:
+  device_index: 1
+  width: 960
+  height: 540
+
+gestures:
+  pinch_threshold: 0.3
+  drag_delay_sec: 0.3
+  dead_zone_margin: 0.3
+
+filter:
+  min_cutoff: 0.1
+  beta: 0.01

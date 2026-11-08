@@ -1,8 +1,8 @@
 import pyautogui
 import time
 import numpy as np
-from src.filters import OneEuroFilter
-import src.config as config
+from filters import OneEuroFilter
+import config as config
 
 pyautogui.PAUSE = 0
 pyautogui.FAILSAFE = False
