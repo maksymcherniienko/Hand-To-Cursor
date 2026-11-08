@@ -1,7 +1,7 @@
 import cv2, pyautogui
-from hand_tracker import HandTracker
-from mouse_control import MouseController
-import config
+from src.hand_tracker import HandTracker
+from src.mouse_control import MouseController
+import src.config as config
 
 def main():
     cap = cv2.VideoCapture(1)
