@@ -2,22 +2,24 @@ import cv2, pyautogui
 from src.hand_tracker import HandTracker
 from src.mouse_control import MouseController
 import src.config as config
+from src.gui import CameraSetupApp
 
 def main():
-    cap = cv2.VideoCapture(config.CAM_INDEX)
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    app = CameraSetupApp()
+    app.protocol("WM_DELETE_WINDOW", app.on_closing)
+    app.mainloop()
+
+    if not app.continue_requested:
+        return
+
+    x_area, y_area, w_area, h_area = app.get_work_area()
+
+    cap = cv2.VideoCapture(app.cam_index)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.CAM_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.CAM_HEIGHT)
 
     tracker = HandTracker()
     mouse = MouseController()
-
-    ret, frame = cap.read()
-    frame = cv2.flip(frame, config.CAM_FLIP)
-    
-    # Вибір зони
-    x_area, y_area, w_area, h_area = cv2.selectROI("Select work area", frame, showCrosshair=True, fromCenter=False)
-    cv2.destroyWindow("Select work area")
     
     if w_area == 0 or h_area == 0:
         cap.release()
@@ -26,10 +28,12 @@ def main():
     while True:
         ret, frame = cap.read()
         if not ret: break
-        frame = cv2.flip(frame, config.CAM_FLIP)
+
+        if app.cam_flip is not None:
+            frame = cv2.flip(frame, app.cam_flip)
 
         # Малюємо зону
-        cv2.rectangle(frame, (x_area, y_area), (x_area + w_area, y_area + h_area), (0, 0, 255), 2)
+        cv2.rectangle(frame, (x_area, y_area), (x_area + w_area, y_area + h_area), (255, 0, 0), 2)
 
         cropped_frame = frame[y_area:y_area+h_area, x_area:x_area+w_area]
         rgb_frame = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)

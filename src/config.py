@@ -19,6 +19,8 @@ CAM_INDEX: int = cfg["camera"]["device_index"]
 CAM_WIDTH: int = cfg["camera"]["width"]
 CAM_HEIGHT: int = cfg["camera"]["height"]
 CAM_FLIP: int = cfg["camera"]["flip"]
+work_area = cfg.get("work_area")
+WORK_AREA = (int(work_area["x"]), int(work_area["y"]), int(work_area["width"]), int(work_area["height"])) if work_area else None
 
 PINCH_THRESHOLD: float = cfg["gestures"]["pinch_threshold"]
 DRAG_DELAY_SEC: float = cfg["gestures"]["drag_delay_sec"]

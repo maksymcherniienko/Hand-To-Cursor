@@ -28,12 +28,24 @@ Hand-to-Cursor/
 ├── main.py              # Application entry point and visualization loop
 ├── requirements.txt     # Python dependencies
 ├── README.md            # Project documentation
+├── AGENTS.md            # Coding-agent entry point
+├── docs/
+│   ├── ai-instructions.md
+│   ├── architecture.md
+│   ├── decisions.md
+│   └── project-overview.md
 └── src/
     ├── config.py        # YAML configuration loader
+    ├── camera_control.py # Camera-index probing
+    ├── gui.py           # Camera setup and work-area selection
     ├── filters.py       # 1-Euro Filter implementation
     ├── hand_tracker.py  # MediaPipe landmark extraction & scale normalization
     └── mouse_control.py # Cursor positioning & gesture state machine
 ```
+
+Developer documentation is in [`docs/`](docs/project-overview.md),
+including the [architecture](docs/architecture.md), [project decisions](docs/decisions.md),
+and [coding-agent instructions](docs/ai-instructions.md).
 
 ---
 
@@ -61,6 +73,7 @@ camera:
   device_index: 0   # Camera index (0 for built-in, 1 for external)
   width: 960
   height: 540
+  flip: 1           # 1 = horizontal, 0 = vertical, -1 = both
 
 gestures:
   pinch_threshold: 0.3   # Normalized pinch distance threshold
@@ -82,9 +95,10 @@ filter:
    ```
 
 2. **Select the work area:**
-   - A window with your camera stream will appear.
-   - Use your mouse to draw a bounding box over your physical work surface.
-   - Press **SPACE** or **ENTER** to confirm the selection.
+   - Choose a flip mode: **Horizontal**, **Vertical**, or **Both**.
+   - In the camera setup window, drag once over the video preview to draw a blue, semi-transparent rectangle around your physical work surface.
+   - Click **Save to config.yaml** to save the camera, flip mode, and selected work area.
+   - Click **Continue** to close setup and start tracking with the selected settings.
 
 3. **Interact:**
    - Move your hand within the selected work area to steer the cursor.

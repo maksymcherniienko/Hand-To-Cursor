@@ -1,14 +1,17 @@
 camera:
-  device_index: 0
-  width: 960
+  device_index: 1
+  flip: null
   height: 540
-  flip: 1
-
-gestures:
-  pinch_threshold: 0.3
-  drag_delay_sec: 0.3
-  dead_zone_margin: 0.3
-
+  width: 960
 filter:
-  min_cutoff: 0.1
   beta: 0.01
+  min_cutoff: 0.1
+gestures:
+  dead_zone_margin: 0.3
+  drag_delay_sec: 0.3
+  pinch_threshold: 0.3
+work_area:
+  height: 283
+  width: 394
+  x: 144
+  y: 152
