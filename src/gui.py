@@ -4,6 +4,9 @@ import customtkinter as ctk
 from PIL import Image, ImageTk
 import src.config as config
 from src.camera_control import get_available_cameras
+from src.hand_tracker import HandTracker
+from src.mouse_control import MouseController
+
 
 CONFIG_PATH = config.CONFIG_PATH
 FLIP_CODE_BY_LABEL = {
@@ -23,8 +26,12 @@ class CameraSetupApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        self.tracker = HandTracker()
+        self.mouse = MouseController()
+
         self.title("Вибір камери")
         self.geometry("1000x600")
+        self.is_running = False
 
         self.cam_index = config.CAM_INDEX
         self.cam_flip = config.CAM_FLIP
@@ -46,7 +53,7 @@ class CameraSetupApp(ctk.CTk):
         self.grid_columnconfigure(1, weight=1)
 
         # --- ЛІВА ПАНЕЛЬ (Керування) ---
-        self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=0)
+        self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=5)
         self.sidebar.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
         ctk.CTkLabel(self.sidebar, text="Налаштування", font=ctk.CTkFont(size=20, weight="bold")).pack(pady=(20, 20))
@@ -72,10 +79,22 @@ class CameraSetupApp(ctk.CTk):
 
         ctk.CTkLabel(
             self.sidebar,
-            text="Потягніть мишкою по відео, щоб вибрати робочу область.",
+            text="Потягніть мишкою щоб вибрати робочу область.",
             wraplength=160,
             justify="left",
+            fg_color="#333333",
+            corner_radius=5,
+            padx=5, pady=5
         ).pack(anchor="w", padx=20, pady=(0, 10))
+
+        self.btn_close = ctk.CTkButton(
+            self.sidebar,
+            text="Close",
+            fg_color="blue",
+            hover_color="darkblue",
+            command=self.on_closing,
+        )
+        self.btn_close.pack(pady=(0, 10), padx=20, fill="x", side="bottom")
 
         self.btn_save = ctk.CTkButton(
             self.sidebar, 
@@ -86,13 +105,21 @@ class CameraSetupApp(ctk.CTk):
         )
         self.btn_save.pack(pady=(20, 20), padx=20, fill="x", side="bottom")
 
-        self.btn_continue = ctk.CTkButton(
+        self.btn_clear_area_selection = ctk.CTkButton(
             self.sidebar,
-            text="Continue",
-            fg_color="blue",
-            command=self.continue_app,
+            text="Clear\n(will use whole camera frame)",
+            command=self.clear_area_selection
         )
-        self.btn_continue.pack(pady=(0, 10), padx=20, fill="x", side="bottom")
+        self.btn_clear_area_selection.pack(padx=20, pady=(0, 10), fill="x")
+
+        self.btn_start_stop = ctk.CTkButton(
+            self.sidebar,
+            text="Start",
+            fg_color="green",
+            hover_color="darkgreen",
+            command=self.start_stop_app,
+        )
+        self.btn_start_stop.pack(pady=(0, 10), padx=20, fill="x", side="bottom")
 
         self.video_frame = ctk.CTkFrame(self)
         self.video_frame.grid(row=0, column=1, sticky="nsew", padx=(0, 10), pady=10)
@@ -148,6 +175,8 @@ class CameraSetupApp(ctk.CTk):
         return x_area, y_area, w_area, h_area
 
     def start_area_selection(self, event):
+        if self.is_running:
+            return
         point = self.canvas_to_frame(event.x, event.y)
         if point is None:
             return
@@ -158,14 +187,14 @@ class CameraSetupApp(ctk.CTk):
         self.drag_area = self.area_from_points(point, point)
 
     def update_area_selection(self, event):
-        if self.drag_start is None:
+        if self.is_running or self.drag_start is None:
             return
         point = self.canvas_to_frame(event.x, event.y)
         if point is not None:
             self.drag_area = self.area_from_points(self.drag_start, point)
 
     def finish_area_selection(self, event):
-        if self.drag_start is None:
+        if self.is_running or self.drag_start is None:
             return
         point = self.canvas_to_frame(event.x, event.y)
         if point is not None:
@@ -173,6 +202,13 @@ class CameraSetupApp(ctk.CTk):
         self.drag_start = None
         self.drag_area = None
 
+    def clear_area_selection(self):
+        if self.is_running:
+            return
+        self.work_area = None
+        self.drag_start = None
+        self.drag_area = None
+    
     def save_config(self):
         """Зберігає індекс камери, flip і робочу область."""
         config_data = {}
@@ -198,7 +234,8 @@ class CameraSetupApp(ctk.CTk):
                 "width": w_area,
                 "height": h_area,
             }
-
+        else: 
+            config_data.pop("work_area", None)
         # Записуємо назад
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             yaml.dump(config_data, f, default_flow_style=False, allow_unicode=True)
@@ -225,6 +262,32 @@ class CameraSetupApp(ctk.CTk):
                 left = (canvas_width - display_width) // 2
                 top = (canvas_height - display_height) // 2
                 self.image_bounds = (left, top, display_width, display_height)
+
+                if self.is_running:
+                    x, y, w, h = self.get_work_area()
+                    cropped_frame = frame[y:y + h, x:x + w]
+
+                    if cropped_frame.size:
+                        rgb_frame = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
+                        hand_data = self.tracker.process_frame(rgb_frame)
+
+                        if hand_data:
+                            self.tracker.mp_draw.draw_landmarks(
+                                cropped_frame,
+                                hand_data["raw_landmarks"],
+                                self.tracker.mp_hands.HAND_CONNECTIONS,
+                            )
+                            self.mouse.move_cursor(hand_data["pointer_x"], hand_data["pointer_y"])
+                            status = self.mouse.handle_gestures(hand_data["normalized_pinch"])
+
+                            if status == "DRAGGING":
+                                cv2.putText(frame, "DRAGGING", (10, 30),
+                                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                            elif status in ("CLICK_STARTED", "RELEASED"):
+                                cv2.putText(frame, "CLICK", (10, 30),
+                                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+
+                    cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
                 preview = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 preview = cv2.resize(preview, (display_width, display_height))
@@ -255,9 +318,16 @@ class CameraSetupApp(ctk.CTk):
 
         self.after(15, self.update_video_frame)
 
-    def continue_app(self):
-        self.continue_requested = True
-        self.on_closing()
+    def start_stop_app(self):
+        self.is_running = not self.is_running
+        if self.is_running:
+            self.drag_start = None
+            self.drag_area = None
+            self.btn_clear_area_selection.configure(state="disabled")
+            self.btn_start_stop.configure(text="Stop", fg_color="red", hover_color="darkred")
+        else:
+            self.btn_clear_area_selection.configure(state="normal")
+            self.btn_start_stop.configure(text="Start", fg_color="green", hover_color="darkgreen")
 
     def on_closing(self):
         # звільнення камери при закритті хрестиком
