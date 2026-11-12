@@ -28,8 +28,8 @@ frame is used.
 - `main.py` — application entry point and real-time tracking/visualization loop.
 - `config.yaml` — runtime camera, work-area, gesture, and filter settings.
 - `requirements.txt` — Python package dependencies.
-- `src/gui.py` — camera setup window, video preview, flip selection, and
-  work-area selection.
+- `src/gui/` — camera setup GUI, split into app lifecycle, layout, camera
+  settings, work-area selection, and video preview modules.
 - `src/camera_control.py` — camera-index probing.
 - `src/config.py` — loads YAML settings and exposes module-level constants.
 - `src/hand_tracker.py` — MediaPipe hand detection and normalized pinch data.

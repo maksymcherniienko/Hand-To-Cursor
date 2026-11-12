@@ -37,7 +37,12 @@ Hand-to-Cursor/
 └── src/
     ├── config.py        # YAML configuration loader
     ├── camera_control.py # Camera-index probing
-    ├── gui.py           # Camera setup and work-area selection
+    ├── gui/             # Camera setup window
+    │   ├── app.py       # Application state and lifecycle
+    │   ├── layout.py    # Window widgets and event bindings
+    │   ├── camera_settings.py # Camera and config controls
+    │   ├── area_selection.py # Work-area coordinate mapping and selection
+    │   └── video_preview.py  # Camera preview and tracking frame updates
     ├── filters.py       # 1-Euro Filter implementation
     ├── hand_tracker.py  # MediaPipe landmark extraction & scale normalization
     └── mouse_control.py # Cursor positioning & gesture state machine

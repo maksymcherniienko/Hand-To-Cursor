@@ -1,4 +1,4 @@
-from src.gui import CameraSetupApp
+from src.gui.app import CameraSetupApp
 
 def main():
     app = CameraSetupApp()

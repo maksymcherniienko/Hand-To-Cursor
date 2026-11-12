@@ -11,6 +11,10 @@ main.py
         └── src.filters.OneEuroFilter
 
 src.gui.CameraSetupApp
+  ├── src.gui.layout
+  ├── src.gui.camera_settings
+  ├── src.gui.area_selection
+  ├── src.gui.video_preview
   ├── src.camera_control.get_available_cameras
   └── config.yaml (read/write)
 
@@ -29,7 +33,10 @@ cropped to the work area, converted from BGR to RGB, and processed by
 
 ### Setup GUI
 
-`CameraSetupApp` owns a camera capture handle while the setup window is open.
+`CameraSetupApp` in `src/gui/app.py` owns a camera capture handle while the
+setup window is open. Its widget construction, camera settings, area-selection
+coordinate mapping, and video-preview loop live in `layout.py`,
+`camera_settings.py`, `area_selection.py`, and `video_preview.py`, respectively.
 Its Tk event loop updates the preview using `.after()` rather than a blocking
 loop. Mouse press, drag, and release events convert the preview coordinates to
 frame coordinates and define `(x, y, width, height)`.
